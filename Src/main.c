@@ -107,6 +107,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
+	__HAL_DBGMCU_FREEZE_IWDG();
   MX_IWDG_Init();
   MX_TIM4_Init();
   MX_TIM2_Init();

@@ -1,6 +1,6 @@
 #include "pid.h"
 
-float dError, error;
+static float dError, error;
 
 float PIDCalc(PID *p, double measurement)
 {

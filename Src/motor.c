@@ -29,11 +29,11 @@ extern TIM_HandleTypeDef htim3;
 
 /* Private variables --------------------------------------------------------*/
 // 测出来的角速度
-float angularSpeed[DOOR_QUANTITY];
+static float angularSpeed[DOOR_QUANTITY];
 // 编码器读数
-int32_t encoderCount[DOOR_QUANTITY];
-static int32_t lastCount[DOOR_QUANTITY]; // 编码器上次读取值
-static float outputPwm[DOOR_QUANTITY];   // PWM输出值
+static int32_t encoderCount[DOOR_QUANTITY];
+static int32_t lastCount[DOOR_QUANTITY];      // 编码器上次读取值
+static float outputPwm[DOOR_QUANTITY]; // PWM输出值
 // 上次角度
 static float prevAngle[DOOR_QUANTITY];
 // 当前角度
@@ -91,16 +91,12 @@ static void SetPWM(uint16_t motorNo, float pwm_val)
         if (pwm_val >= 0)
         {
             pwm = pwm_val * MAX_PWM_VAL;
-            // TIM1->CCR1 = pwm;
-            // TIM1->CCR2 = 0;
             TIM1->CCR1 = 0;
             TIM1->CCR2 = pwm;
         }
         else
         {
             pwm = -pwm_val * MAX_PWM_VAL;
-            // TIM1->CCR1 = 0;
-            // TIM1->CCR2 = pwm;
             TIM1->CCR1 = pwm;
             TIM1->CCR2 = 0;
         }
@@ -110,19 +106,34 @@ static void SetPWM(uint16_t motorNo, float pwm_val)
         if (pwm_val >= 0)
         {
             pwm = pwm_val * MAX_PWM_VAL;
-            // TIM1->CCR3 = pwm;
-            // TIM1->CCR4 = 0;
             TIM1->CCR3 = 0;
             TIM1->CCR4 = pwm;
         }
         else
         {
             pwm = -pwm_val * MAX_PWM_VAL;
-            // TIM1->CCR3 = 0;
-            // TIM1->CCR4 = pwm;
             TIM1->CCR3 = pwm;
             TIM1->CCR4 = 0;
         }
+    }
+}
+
+/**
+ * @brief: 设置比较值为0，停止电机转动
+ * @param: 门的编号
+ * @retval: None
+ */
+void SetAngularSpeedToZero(uint16_t motorNo)
+{
+    if (motorNo == LEFT)
+    {
+        TIM1->CCR1 = 0;
+        TIM1->CCR2 = 0;
+    }
+    else if (motorNo == RIGHT)
+    {
+        TIM1->CCR3 = 0;
+        TIM1->CCR4 = 0;
     }
 }
 

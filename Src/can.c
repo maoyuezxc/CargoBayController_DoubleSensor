@@ -43,6 +43,8 @@ static AppCanMsg_t receivedCanMessage;
 static uint8_t sendBuffer[CAN_MSG_LEN];
 static uint16_t sendLen;
 
+static CargoDoorControl_t cargoDoorControl;
+
 /**
  * @brief  Configure the CAN bus, configure the CAN ID filter, start CAN1 and enable the callback function.
  * @param  None
@@ -134,7 +136,7 @@ void CanFunction(void)
     if (CAN_MSG_RECEIVED & CanEventFlags)
     {
         CanEventFlags &= ~(uint32_t)CAN_MSG_RECEIVED;
-        CargoDoorControl_t cargoDoorControl;
+
         memcpy(&cargoDoorControl, receivedCanMessage.payload, sizeof(cargoDoorControl));
         InformDoorControl(cargoDoorControl.doorId, cargoDoorControl.action);
     }

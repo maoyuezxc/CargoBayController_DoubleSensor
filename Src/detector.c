@@ -4,7 +4,7 @@
 #include "door_control.h"
 
 // 到位检测
-static bool doorClosed[DOOR_QUANTITY];
+bool doorClosed[DOOR_QUANTITY];
 // 消抖晃计数器
 static uint32_t closeAntiJitterCount[DOOR_QUANTITY];
 static uint32_t openAntiJitterCount[DOOR_QUANTITY];

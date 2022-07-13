@@ -11,9 +11,11 @@
 
 /* ------------------- Angular parameters ------------------------------- */
 #define ANGULAR_DEAD_ZONE 0.02f
-#define OPEN_ANGLE (PI * 90.0f / 180.0f)    // 95 degrees
-#define CLOSE_ANGLE (PI * -100.0f / 180.0f) // -105 degrees
-const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -12.0f / 180.0f, PI * -16.0f / 180.0f};
+#define OPEN_ANGLE (PI * 90.0f / 180.0f)    // 95 degrees，90 degree - wolf on 2022.07.11
+#define CLOSE_ANGLE (PI * -100.0f / 180.0f) // -105 degrees, 100 degree - wolf on 2022.07.11
+const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -5.0f / 180.0f, PI * -3.0f / 180.0f};
+// original value: {PI * -12.0f / 180.0f, PI * -16.0f / 180.0f};
+// value for the 1# cargo:{PI * -5.0f / 180.0f, PI * -3.0f / 180.0f}
 
 #define REPORT_STATUS_TIME 200
 #define WAIT_SENSOR_TIME 300
@@ -112,7 +114,7 @@ void DoorControlFunction(void)
             {
                 ClearEncoderAndAngle(i);
                 goalAngle[i] = TIGHT_ANGLE[i];
-                SetAngularSpeed(i, -ANGULAR_SPEED);
+                SetAngularSpeed(i, -ANGULAR_SPEED); //-ANGULAR_SPEED
                 doorState[i] = LID_STATUS_CLOSED;
             }
             break;
