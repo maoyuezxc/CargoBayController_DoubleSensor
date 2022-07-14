@@ -4,7 +4,7 @@
 #include "OverCurrentProtection.h"
 
 // 电机平均象征电流0 - 1.0
-float averageCurrent[DOOR_QUANTITY];
+static float averageCurrent[DOOR_QUANTITY];
 // 电机电流保护门限
 static const float CLOSE_LID_PROTECTION_CURRENT = -0.44f;
 static const float OPEN_LID_PROTECTION_CURRENT = 0.47f;
