@@ -24,3 +24,4 @@ void DoorControlFunction(void);
 void InitDoorControl(void);
 void InformDoorControl(uint16_t lidId, uint16_t action);
 void SetLidStatus(uint16_t lidNo, uint16_t status);
+uint16_t GetDoorStatus(uint16_t DoorNo);

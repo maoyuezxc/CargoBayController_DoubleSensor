@@ -20,7 +20,6 @@
 
 /* --------------- Private functions ---------------------------------------*/
 static void SetPWM(uint16_t motorNo, float pwm_val);
-void PositionControl(void);
 
 /* External variables---------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
@@ -32,8 +31,8 @@ extern TIM_HandleTypeDef htim3;
 static float angularSpeed[DOOR_QUANTITY];
 // 编码器读数
 static int32_t encoderCount[DOOR_QUANTITY];
-static int32_t lastCount[DOOR_QUANTITY];      // 编码器上次读取值
-static float outputPwm[DOOR_QUANTITY]; // PWM输出值
+static int32_t lastCount[DOOR_QUANTITY]; // 编码器上次读取值
+static float outputPwm[DOOR_QUANTITY];          // PWM输出值
 // 上次角度
 static float prevAngle[DOOR_QUANTITY];
 // 当前角度
@@ -85,6 +84,7 @@ static void SetPWM(uint16_t motorNo, float pwm_val)
         pwm_val = 1.0f;
     else if (pwm_val < -1.0f)
         pwm_val = -1.0f;
+
     uint16_t pwm;
     if (motorNo == LEFT)
     {
@@ -119,12 +119,13 @@ static void SetPWM(uint16_t motorNo, float pwm_val)
 }
 
 /**
- * @brief: 设置比较值为0，停止电机转动
+ * @brief: 设置比较值为0，停止电机转动, 同时把PID的目标值设置为0
  * @param: 门的编号
  * @retval: None
  */
 void SetAngularSpeedToZero(uint16_t motorNo)
 {
+    SetAngularSpeed(motorNo, 0);
     if (motorNo == LEFT)
     {
         TIM1->CCR1 = 0;
@@ -135,6 +136,8 @@ void SetAngularSpeedToZero(uint16_t motorNo)
         TIM1->CCR3 = 0;
         TIM1->CCR4 = 0;
     }
+		
+    outputPwm[motorNo] = 0;
 }
 
 /**

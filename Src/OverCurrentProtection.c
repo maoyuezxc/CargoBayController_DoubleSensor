@@ -14,7 +14,8 @@ void UpdateOverCurrentProtection(uint16_t motorNo, float current)
 	averageCurrent[motorNo] = averageCurrent[motorNo] * 0.9f + current * 0.1f;
 	if (averageCurrent[motorNo] > OPEN_LID_PROTECTION_CURRENT || averageCurrent[motorNo] < CLOSE_LID_PROTECTION_CURRENT)
 	{
-		SetAngularSpeed(motorNo, 0);
+		// SetAngularSpeed(motorNo, 0);
+		// SetAngularSpeedToZero(motorNo);
 		SetLidStatus(motorNo, LID_STATUS_FAULT);
 	}
 }

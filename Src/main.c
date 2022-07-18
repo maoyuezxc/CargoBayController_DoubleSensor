@@ -107,13 +107,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
-	__HAL_DBGMCU_FREEZE_IWDG();
   MX_IWDG_Init();
   MX_TIM4_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_CAN_Init();
+
   /* USER CODE BEGIN 2 */
+  __HAL_DBGMCU_FREEZE_IWDG();
+  __HAL_DBGMCU_FREEZE_TIM1();
+  __HAL_DBGMCU_FREEZE_TIM2();
+  __HAL_DBGMCU_FREEZE_TIM3();
+  __HAL_DBGMCU_FREEZE_TIM4();
+
   MotorInit();
   HAL_TIM_Base_Start_IT(&htim4);
   InitCan();
