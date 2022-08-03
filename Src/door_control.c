@@ -1,13 +1,15 @@
 #include "main.h"
+#include "can.h"
 #include "motor.h"
+#include <string.h>
 #include "detector.h"
 #include "door_control.h"
-#include "can.h"
-#include <string.h>
+#include "OverCurrentProtection.h"
 
 /* ------------------ Speed parameters ----------------------------------*/
 #define ANGULAR_SPEED 0.27f
 #define ANGULAR_ACCELARATION 0.02f
+#define DOOR_HALF_CLOSED_DELAY (1000)
 
 /* ------------------- Angular parameters ------------------------------- */
 #define ANGULAR_DEAD_ZONE 0.02f
@@ -35,6 +37,8 @@ static uint32_t lastTick;
 
 static void ReportLidStatus(void);
 
+static uint32_t HalfClosedDelay;
+
 /** Initialize door control, parameters ...
  * @param none
  * @retval none
@@ -55,10 +59,11 @@ void InitDoorControl(void)
  */
 void DoorOpen(uint16_t doorNo)
 {
-    if (IsDoorClosed(doorNo))
+    if (DoorClosedDetected(doorNo) != DETECT_DOOR_OPEN)
     {
         doorState[doorNo] = LID_STATUS_OPENING;
         goalAngle[doorNo] = OPEN_ANGLE;
+        ClearOverCurrentStatus(doorNo);
         SetAngularSpeed(doorNo, ANGULAR_SPEED);
     }
 }
@@ -74,6 +79,7 @@ void DoorClose(uint16_t doorNo)
     {
         doorState[doorNo] = LID_STATUS_CLOSING;
         goalAngle[doorNo] = CLOSE_ANGLE;
+        ClearOverCurrentStatus(doorNo);
         SetAngularSpeed(doorNo, -ANGULAR_SPEED);
     }
 }
@@ -81,7 +87,10 @@ void DoorClose(uint16_t doorNo)
 void DoorReset(uint16_t doorNo)
 {
     if (LID_STATUS_FAULT == doorState[doorNo])
+    {
         doorState[doorNo] = LID_STATUS_READY;
+        ClearOverCurrentStatus(doorNo);
+    }
 }
 
 uint16_t ll(uint16_t DoorNo)
@@ -98,7 +107,7 @@ void DoorControlFunction(void)
         case LID_STATUS_READY:
             if (HAL_GetTick() < WAIT_SENSOR_TIME)
                 break;
-            if (IsDoorClosed(i))
+            if (DETECT_DOOR_CLOSED == DoorClosedDetected(i))
             {
                 ClearEncoderAndAngle(i);
                 goalAngle[i] = 0;
@@ -114,12 +123,41 @@ void DoorControlFunction(void)
             break;
 
         case LID_STATUS_CLOSING:
-            if (IsDoorClosed(i))
+            if (DoorClosedDetected(i) == DETECT_DOOR_HALF_CLOSED)
             {
                 ClearEncoderAndAngle(i);
                 goalAngle[i] = TIGHT_ANGLE[i];
                 SetAngularSpeed(i, -ANGULAR_SPEED); //-ANGULAR_SPEED
+                // doorState[i] = LID_STATUS_CLOSED;
+                doorState[i] = LID_STATUS_TIGHTING;
+                HalfClosedDelay = HAL_GetTick();
+            }
+            else if (GetOverCurrentStatus(i))
+                doorState[i] = LID_STATUS_FAULT;
+            break;
+
+        case LID_STATUS_TIGHTING:
+            if (DoorClosedDetected(i) == DETECT_DOOR_CLOSED)
+            {
+                SetAngularSpeedToZero(i);
                 doorState[i] = LID_STATUS_CLOSED;
+                ClearOverCurrentStatus(i);
+            }
+            else if (GetOverCurrentStatus(i) || HAL_GetTick() - HalfClosedDelay > DOOR_HALF_CLOSED_DELAY)
+            {
+                SetAngularSpeedToZero(i);
+                doorState[i] = LID_STATUS_FAULT;
+                ClearOverCurrentStatus(i);
+            }
+            break;
+
+        case LID_STATUS_OPENING:
+            if (GetOverCurrentStatus(i))
+                doorState[i] = LID_STATUS_FAULT;
+            if (GetMotorPosition(i) >= OPEN_ANGLE)
+            {
+                SetAngularSpeedToZero(i);
+                doorState[i] = LID_STATUS_OPENED;
             }
             break;
 
@@ -131,14 +169,15 @@ void DoorControlFunction(void)
             break;
         }
 
-        float diffAngle = goalAngle[i] - GetMotorPosition(i);
-        if (diffAngle < ANGULAR_DEAD_ZONE && diffAngle > -ANGULAR_DEAD_ZONE)
-        {
-            // SetAngularSpeed(i, 0);
-            SetAngularSpeedToZero(i);
-            if (LID_STATUS_OPENING == doorState[i])
-                doorState[i] = LID_STATUS_OPENED;
-        }
+        //        float diffAngle = goalAngle[i] - GetMotorPosition(i);
+        //        if (diffAngle < ANGULAR_DEAD_ZONE && diffAngle > -ANGULAR_DEAD_ZONE)
+        //        {
+        //            // SetAngularSpeed(i, 0);
+        //            SetAngularSpeedToZero(i);
+        //            if (LID_STATUS_OPENING == doorState[i])
+        //                doorState[i] = LID_STATUS_OPENED;
+        //
+        //        }
     }
 
     uint32_t timeInterval = HAL_GetTick() - lastTick;
@@ -151,7 +190,7 @@ void DoorControlFunction(void)
 
 /**
  * @brief Inform the door control module command received.
- * Provide an interface for CAN module to infrom the door control module
+ * Provide an interface for CAN module to inform the door control module
  * when there're new commands received. The function will analysis the
  * message and control the lid as the command.
  * @param lidId 1 - Front lid 2 - Rear Lid

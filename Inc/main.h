@@ -61,14 +61,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SENSOR_0_Pin GPIO_PIN_2
+#define SENSOR_0_GPIO_Port GPIOB
 #define EN0_Pin GPIO_PIN_13
 #define EN0_GPIO_Port GPIOB
 #define EN1_Pin GPIO_PIN_14
 #define EN1_GPIO_Port GPIOB
-#define SENSOR_0_Pin GPIO_PIN_3
-#define SENSOR_0_GPIO_Port GPIOB
-#define SENSOR_1_Pin GPIO_PIN_4
+#define SENSOR_1_Pin GPIO_PIN_3
 #define SENSOR_1_GPIO_Port GPIOB
+#define SENSOR_2_Pin GPIO_PIN_4
+#define SENSOR_2_GPIO_Port GPIOB
+#define SENSOR_3_Pin GPIO_PIN_5
+#define SENSOR_3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

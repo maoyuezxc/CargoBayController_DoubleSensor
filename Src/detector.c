@@ -2,9 +2,15 @@
 #include "motor.h"
 #include "detector.h"
 #include "door_control.h"
+#include "io.h"
+#define SENSOR_QUANTITY (4U)
 
 // 到位检测
-static bool doorClosed[DOOR_QUANTITY];
+static uint8_t doorClosed[DOOR_QUANTITY];
+static bool sensorDetected[4]; // 0 and 1 for front door, 2 and 3 for rear door;
+static uint8_t SensorClosedAntiJitterCount[4];
+static uint8_t SensorOpenAntiJitterCount[4];
+
 // 消抖晃计数器
 static uint32_t closeAntiJitterCount[DOOR_QUANTITY];
 static uint32_t openAntiJitterCount[DOOR_QUANTITY];
@@ -12,57 +18,62 @@ static const uint32_t JITTER_NUMBER = 10;
 
 void Detector(void)
 {
-	if (HAL_GPIO_ReadPin(SENSOR_0_GPIO_Port, SENSOR_0_Pin))
-	{ // 检测到门关好信号，假如是第一次检测到，复位编码器的值为零
-		openAntiJitterCount[0] = 0;
-		if (++closeAntiJitterCount[0] > JITTER_NUMBER)
-		{
-			// if(!doorClosed[0]) ClearEncoderAndAngle(0);
-			closeAntiJitterCount[0] = 0;
-			doorClosed[0] = true;
-		}
-	}
-	else
+	uint8_t i;
+	for (i = PinSensor0; i <= PinSensor3; i++)
 	{
-		closeAntiJitterCount[0] = 0;
-		if (++openAntiJitterCount[0] > JITTER_NUMBER)
+		if (ReadPinState(i))
 		{
-			openAntiJitterCount[0] = 0;
-			doorClosed[0] = false;
+			SensorOpenAntiJitterCount[i] = 0;
+			if (++SensorClosedAntiJitterCount[i] > JITTER_NUMBER)
+			{
+				SensorClosedAntiJitterCount[i] = 0;
+				sensorDetected[i] = true;
+			}
+		}
+		else
+		{
+			SensorClosedAntiJitterCount[i] = 0;
+			if (++SensorOpenAntiJitterCount[i] > JITTER_NUMBER)
+			{
+				SensorOpenAntiJitterCount[i] = 0;
+				sensorDetected[i] = false;
+			}
 		}
 	}
-	if (HAL_GPIO_ReadPin(SENSOR_1_GPIO_Port, SENSOR_1_Pin))
-	{ // 检测到门关好信号，假如是第一次检测到，复位编码器的值为零
-		openAntiJitterCount[1] = 0;
-		if (++closeAntiJitterCount[1] > JITTER_NUMBER)
-		{
-			// if(!doorClosed[1]) ClearEncoderAndAngle(1);
-			closeAntiJitterCount[1] = 0;
-			doorClosed[1] = true;
-		}
-	}
-	else
+
+	for (i = 0; i < 2; i++)
 	{
-		closeAntiJitterCount[1] = 0;
-		if (++openAntiJitterCount[1] > JITTER_NUMBER)
+		if (sensorDetected[2 * i] && sensorDetected[2 * i + 1])
 		{
-			openAntiJitterCount[1] = 0;
-			doorClosed[1] = false;
+			doorClosed[i] = DETECT_DOOR_CLOSED;
+		}
+		else
+		{
+			if (sensorDetected[2 * i] || sensorDetected[2 * i + 1])
+				doorClosed[i] = DETECT_DOOR_HALF_CLOSED;
+			else
+				doorClosed[i] = DETECT_DOOR_OPEN;
 		}
 	}
 }
 
-bool IsDoorClosed(uint16_t doorNo)
+uint8_t DoorClosedDetected(uint16_t doorNo)
 {
 	return doorClosed[doorNo];
 }
 
 void InitDetector(void)
 {
-	for (int i = 0; i < DOOR_QUANTITY; ++i)
+	uint8_t i;
+	for (i = 0; i < DOOR_QUANTITY; ++i)
 	{
-		doorClosed[i] = false;
-		closeAntiJitterCount[i] = 0;
-		openAntiJitterCount[i] = 0;
+		doorClosed[i] = DETECT_DOOR_OPEN;
+	}
+
+	for (i = 0; i < SENSOR_QUANTITY; ++i)
+	{
+		sensorDetected[i] = false;
+		SensorClosedAntiJitterCount[i] = 0;
+		SensorOpenAntiJitterCount[i] = 0;
 	}
 }

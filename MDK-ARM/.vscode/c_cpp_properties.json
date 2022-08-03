@@ -3,15 +3,15 @@
         {
             "name": "MotorController",
             "includePath": [
-                "d:\\02_continental_robot4\\06_CargoBayControl\\02_software\\CargoBayControl_SingleSensor\\Inc",
+                "d:\\02_continental_robot4\\06_CargoBayControl\\02_software\\CargoBayControl_DoubleSensor\\Inc",
                 "C:\\Users\\Wolf\\STM32Cube\\Repository\\STM32Cube_FW_F1_V1.8.4\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
                 "C:\\Users\\Wolf\\STM32Cube\\Repository\\STM32Cube_FW_F1_V1.8.4\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
                 "C:\\Users\\Wolf\\STM32Cube\\Repository\\STM32Cube_FW_F1_V1.8.4\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
                 "C:\\Users\\Wolf\\STM32Cube\\Repository\\STM32Cube_FW_F1_V1.8.4\\Drivers\\CMSIS\\Include",
                 "C:\\Program Files\\Keil_v5\\ARM\\ARMCC\\include",
                 "C:\\Program Files\\Keil_v5\\ARM\\ARMCC\\include\\rw",
-                "d:\\02_continental_robot4\\06_CargoBayControl\\02_software\\CargoBayControl_SingleSensor\\MDK-ARM",
-                "d:\\02_continental_robot4\\06_CargoBayControl\\02_software\\CargoBayControl_SingleSensor\\Src",
+                "d:\\02_continental_robot4\\06_CargoBayControl\\02_software\\CargoBayControl_DoubleSensor\\MDK-ARM",
+                "d:\\02_continental_robot4\\06_CargoBayControl\\02_software\\CargoBayControl_DoubleSensor\\Src",
                 "C:\\Users\\Wolf\\STM32Cube\\Repository\\STM32Cube_FW_F1_V1.8.4\\Drivers\\STM32F1xx_HAL_Driver\\Src"
             ],
             "defines": [

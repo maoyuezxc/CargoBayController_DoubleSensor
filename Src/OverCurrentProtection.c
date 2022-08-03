@@ -7,7 +7,9 @@
 static float averageCurrent[DOOR_QUANTITY];
 // 电机电流保护门限
 static const float CLOSE_LID_PROTECTION_CURRENT = -0.44f;
-static const float OPEN_LID_PROTECTION_CURRENT = 0.47f;
+static const float OPEN_LID_PROTECTION_CURRENT = 0.50f;
+// Over-current status
+static bool overCurrent[DOOR_QUANTITY];
 
 void UpdateOverCurrentProtection(uint16_t motorNo, float current)
 {
@@ -16,6 +18,28 @@ void UpdateOverCurrentProtection(uint16_t motorNo, float current)
 	{
 		// SetAngularSpeed(motorNo, 0);
 		// SetAngularSpeedToZero(motorNo);
-		SetLidStatus(motorNo, LID_STATUS_FAULT);
+		// SetLidStatus(motorNo, LID_STATUS_FAULT);
+		overCurrent[motorNo] = true;
 	}
+}
+
+/**
+ * @brief Get the Over Current Status
+ *
+ * @param motorNo motor's ID.
+ * @return true There's an over-current situation happens.
+ * @return false No over-current happens.
+ */
+bool GetOverCurrentStatus(uint16_t motorNo)
+{
+	if (motorNo >= DOOR_QUANTITY)
+		return false;
+	return overCurrent[motorNo];
+}
+
+void ClearOverCurrentStatus(uint16_t motorNo)
+{
+	if (motorNo >= DOOR_QUANTITY)
+		return;
+	overCurrent[motorNo] = false;
 }
