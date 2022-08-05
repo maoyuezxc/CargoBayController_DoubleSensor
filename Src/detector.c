@@ -7,13 +7,11 @@
 
 // 到位检测
 static uint8_t doorClosed[DOOR_QUANTITY];
-static bool sensorDetected[4]; // 0 and 1 for front door, 2 and 3 for rear door;
+bool sensorDetected[4]; // 0 and 1 for front door, 2 and 3 for rear door;
 static uint8_t SensorClosedAntiJitterCount[4];
 static uint8_t SensorOpenAntiJitterCount[4];
 
 // 消抖晃计数器
-static uint32_t closeAntiJitterCount[DOOR_QUANTITY];
-static uint32_t openAntiJitterCount[DOOR_QUANTITY];
 static const uint32_t JITTER_NUMBER = 10;
 
 void Detector(void)
@@ -49,10 +47,7 @@ void Detector(void)
 		}
 		else
 		{
-			if (sensorDetected[2 * i] || sensorDetected[2 * i + 1])
-				doorClosed[i] = DETECT_DOOR_HALF_CLOSED;
-			else
-				doorClosed[i] = DETECT_DOOR_OPEN;
+			doorClosed[i] = DETECT_DOOR_OPEN;
 		}
 	}
 }

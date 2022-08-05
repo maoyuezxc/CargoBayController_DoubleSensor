@@ -9,7 +9,7 @@ static float averageCurrent[DOOR_QUANTITY];
 static const float CLOSE_LID_PROTECTION_CURRENT = -0.44f;
 static const float OPEN_LID_PROTECTION_CURRENT = 0.50f;
 // Over-current status
-static bool overCurrent[DOOR_QUANTITY];
+bool overCurrent[DOOR_QUANTITY];
 
 void UpdateOverCurrentProtection(uint16_t motorNo, float current)
 {

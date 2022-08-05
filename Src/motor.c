@@ -36,7 +36,7 @@ static float outputPwm[DOOR_QUANTITY];          // PWM输出值
 // 上次角度
 static float prevAngle[DOOR_QUANTITY];
 // 当前角度
-static float currentAngle[DOOR_QUANTITY];
+float currentAngle[DOOR_QUANTITY];
 
 // PID 参数
 static PID motorPID[DOOR_QUANTITY];
