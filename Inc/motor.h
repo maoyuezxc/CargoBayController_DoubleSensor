@@ -8,8 +8,8 @@
 
 // 轮子每转一圈的AB相边沿数量之和
 // 减速比515，编码器每圈17个脉冲，X4，齿轮减速比1.5:1
-//#define EDGE_PER_CIRCLE (515.0f * 11.0f * 4.0f * 36.0f / 30.0f) //原来52530, 515.0f * 11.0f * 4.0f* 36.0f / 30.0f
-#define EDGE_PER_CIRCLE (515.0f * 11.0f * 4.0f * 18.0f /12.0f)
+#define EDGE_PER_CIRCLE (515.0f * 11.0f * 4.0f * 36.0f / 30.0f) //原来52530, 515.0f * 11.0f * 4.0f* 36.0f / 30.0f
+//#define EDGE_PER_CIRCLE (515.0f * 11.0f * 4.0f * 18.0f /12.0f)
 // TIM4定时器每一次跳动的时间周期
 #define TIME_PERIOD 0.02
 

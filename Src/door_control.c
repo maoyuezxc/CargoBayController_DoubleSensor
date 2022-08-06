@@ -16,7 +16,7 @@
 #define OPEN_ANGLE (PI * 90.0f / 180.0f) // 95 degrees，90 degree - wolf on 2022.07.11
 #define OPEN_ANGLE_FOR_CLOSE_JAM (PI * 25.0f / 180.0f)
 #define CLOSE_ANGLE (PI * -100.0f / 180.0f) // -105 degrees, 100 degree - wolf on 2022.07.11
-static const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -12.0f / 180.0f, PI * -18.0f / 180.0f};
+static const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -5.0f / 180.0f, PI * -8.0f / 180.0f};
 
 // original value: {PI * -12.0f / 180.0f, PI * -16.0f / 180.0f};
 
