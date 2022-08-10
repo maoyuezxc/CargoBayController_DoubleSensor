@@ -16,7 +16,7 @@
 #define OPEN_ANGLE (PI * 90.0f / 180.0f) // 95 degrees，90 degree - wolf on 2022.07.11
 #define OPEN_ANGLE_FOR_CLOSE_JAM (PI * 25.0f / 180.0f)
 #define CLOSE_ANGLE (PI * -100.0f / 180.0f) // -105 degrees, 100 degree - wolf on 2022.07.11
-static const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -5.0f / 180.0f, PI * -8.0f / 180.0f};
+static const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -5.0f / 180.0f, PI * -6.0f / 180.0f};
 
 // original value: {PI * -12.0f / 180.0f, PI * -16.0f / 180.0f};
 
@@ -24,7 +24,7 @@ static const float TIGHT_ANGLE[DOOR_QUANTITY] = {PI * -5.0f / 180.0f, PI * -8.0f
 #define WAIT_SENSOR_TIME 300
 #define CLOSE_ANGLE_TH (PI * 70.0f / 180.0f)
 #define OPEN_ANGLE_TH (PI * 20.0f / 180.0f)
-#define FRONT_OPEN_OFFSET (PI * 3.0f / 180.0f)
+#define FRONT_OPEN_OFFSET (PI * 4.0f / 180.0f)
 
 typedef struct
 {
@@ -40,7 +40,7 @@ LidStatusTypeDef doorState[DOOR_QUANTITY];
 static float goalAngle[DOOR_QUANTITY];
 // 系统Tick
 static uint32_t lastTick;
-bool IsPowerOnJam[DOOR_QUANTITY] = {true, true};
+bool IsPowerOnJam = true;
 
 /* --------------Static Functions---------------- */
 static void TightDoor(uint16_t doorNo);
@@ -66,28 +66,12 @@ void InitDoorControl(void)
  */
 void DoorOpen(uint16_t doorNo)
 {
-
-    if (doorState[FRONT] == LID_STATUS_FAULT && IsPowerOnJam[FRONT])
-    {
-        doorState[FRONT] = LID_STATUS_OPENING;
-        ClearEncoderAndAngle(FRONT);
-        goalAngle[FRONT] = OPEN_ANGLE_FOR_CLOSE_JAM;
-        SetAngularSpeed(FRONT, ANGULAR_SPEED);
-        return;
-    }
-
-    else if (doorState[REAR] == LID_STATUS_FAULT && IsPowerOnJam[REAR])
-    {
-        doorState[REAR] = LID_STATUS_OPENING;
-        ClearEncoderAndAngle(REAR);
-        goalAngle[REAR] = OPEN_ANGLE_FOR_CLOSE_JAM;
-        SetAngularSpeed(REAR, ANGULAR_SPEED);
-        return;
-    }
     // the original state:
     if (doorState[doorNo] == LID_STATUS_CLOSED ||
         doorState[doorNo] == LID_STATUS_FAULT)
     {
+        if (IsPowerOnJam)
+            return;
         doorState[doorNo] = LID_STATUS_OPENING;
         if (doorNo == FRONT)
             goalAngle[doorNo] = OPEN_ANGLE + FRONT_OPEN_OFFSET;
@@ -175,14 +159,8 @@ void DoorControlFunction(void)
         case LID_STATUS_CLOSING:
             if (GetOverCurrentStatus(i))
             {
-                if (IsPowerOnJam[i])
-                    doorState[i] = LID_STATUS_FAULT;
-                else
-                {
-                    doorState[FRONT] = LID_STATUS_FAULT;
-                    doorState[REAR] = LID_STATUS_FAULT;
-                }
-
+                doorState[FRONT] = LID_STATUS_FAULT;
+                doorState[REAR] = LID_STATUS_FAULT;
                 ClearOverCurrentStatus(i);
             }
             else
@@ -192,25 +170,18 @@ void DoorControlFunction(void)
                     TightDoor(i);
                 }
 
-                else
-                {
-                    if (FRONT == i)
-                        if (GetMotorPosition(i) < CLOSE_ANGLE_TH &&
-                            doorState[REAR] == LID_STATUS_OPENED)
-                            DoorClose(REAR);
-                }
+                if (FRONT == i)
+                    if (GetMotorPosition(i) < CLOSE_ANGLE_TH &&
+                        doorState[REAR] == LID_STATUS_OPENED)
+                        DoorClose(REAR);
             }
             break;
 
         case LID_STATUS_TIGHTING:
-            if (GetOverCurrentStatus(i))
-            {
-                doorState[i] = LID_STATUS_FAULT;
-                ClearOverCurrentStatus(i);
-            }
-            else if (GetMotorPosition(i) < goalAngle[i])
+            if (GetOverCurrentStatus(i) || GetMotorPosition(i) < goalAngle[i])
             {
                 doorState[i] = LID_STATUS_CLOSED;
+                ClearOverCurrentStatus(i);
             }
             break;
 
@@ -226,32 +197,23 @@ void DoorControlFunction(void)
             {
                 if (GetMotorPosition(i) >= goalAngle[i])
                 {
-                    // SetAngularSpeedToZero(i);
                     doorState[i] = LID_STATUS_OPENED;
-                    if (IsPowerOnJam[i])
-                    {
-                        doorState[FRONT] = LID_STATUS_FAULT;
-                        doorState[REAR] = LID_STATUS_FAULT;
-                    }
                 }
 
-                else
+                else if (GetMotorPosition(i) >= OPEN_ANGLE_TH)
                 {
-                    if (REAR == i)
-                    {
 
-                        if (GetMotorPosition(i) >= OPEN_ANGLE_TH &&
-                            (doorState[FRONT] == LID_STATUS_CLOSED ||
-                             doorState[FRONT] == LID_STATUS_FAULT))
-                            DoorOpen(FRONT);
-                    }
+                    if (REAR == i &&
+                        (doorState[FRONT] == LID_STATUS_CLOSED ||
+                         doorState[FRONT] == LID_STATUS_FAULT))
+                        DoorOpen(FRONT);
                 }
             }
-
             break;
 
         case LID_STATUS_CLOSED:
-            IsPowerOnJam[i] = false;
+            if (IsPowerOnJam)
+                IsPowerOnJam = false;
         case LID_STATUS_FAULT:
         case LID_STATUS_OPENED:
             SetAngularSpeedToZero(i);
